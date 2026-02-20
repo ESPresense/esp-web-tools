@@ -88,7 +88,13 @@ export const flash = async (
     details: { done: true },
   });
 
-  build = manifest.builds.find((b) => b.chipFamily === chipFamily);
+  const matchingBuilds = manifest.builds.filter((b) => b.chipFamily === chipFamily);
+  build = matchingBuilds[0];
+
+  if (matchingBuilds.length > 1) {
+    const detectedSerialType = isNativeUSB ? "cdc" : "normal";
+    build = matchingBuilds.find((b) => b.serialType === detectedSerialType) || matchingBuilds[0];
+  }
 
   if (!build) {
     fireStateEvent({

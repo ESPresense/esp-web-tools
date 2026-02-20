@@ -20,10 +20,6 @@ export const connect = async (button: InstallButton) => {
     return;
   }
 
-  const info = port.getInfo();
-  const customEvent = new CustomEvent("port-picked", { detail: { port, info } });
-  window.dispatchEvent(customEvent);
-
   try {
     await port.open({ baudRate: 115200, bufferSize: 8192 });
   } catch (err: any) {
