@@ -60,11 +60,7 @@ export const flash = async (
   });
 
   try {
-    if (isNativeUSB) {
-      console.log("Native USB CDC detected, bypassing esploader.main() ROM probe");
-    } else {
-      await esploader.main();
-    }
+    await esploader.main();
     await esploader.flashId();
   } catch (err: any) {
     console.error(err);
