@@ -38,7 +38,12 @@ export const flash = async (
     });
 
   const transport = new Transport(port);
-  const esploader = new ESPLoader({
+  let esploader: ESPLoader | undefined;
+
+  const portInfo = port.getInfo();
+  const isNativeUSB = portInfo && portInfo.usbVendorId === 0x303a && portInfo.usbProductId !== undefined && [0x1001, 0x1002, 0x1003, 0x0002, 0x0003].includes(portInfo.usbProductId);
+
+  esploader = new ESPLoader({
     transport,
     baudrate: 115200,
     romBaudrate: 115200,
@@ -55,7 +60,11 @@ export const flash = async (
   });
 
   try {
-    await esploader.main();
+    if (isNativeUSB) {
+      console.log("Native USB CDC detected, bypassing esploader.main() ROM probe");
+    } else {
+      await esploader.main();
+    }
     await esploader.flashId();
   } catch (err: any) {
     console.error(err);
@@ -66,12 +75,12 @@ export const flash = async (
       details: { error: FlashError.FAILED_INITIALIZING, details: err },
     });
 
-    await hardResetDevice(transport, esploader);
+    await hardResetDevice(transport, esploader!);
     await transport.disconnect();
     return;
   }
 
-  chipFamily = esploader.chip.CHIP_NAME as any;
+  chipFamily = esploader!.chip.CHIP_NAME as any;
 
   fireStateEvent({
     state: FlashStateType.INITIALIZING,
@@ -87,7 +96,7 @@ export const flash = async (
       message: `Your ${chipFamily} board is not supported.`,
       details: { error: FlashError.NOT_SUPPORTED, details: chipFamily },
     });
-    await hardResetDevice(transport, esploader);
+    await hardResetDevice(transport, esploader!);
     await transport.disconnect();
     return;
   }
@@ -152,7 +161,7 @@ export const flash = async (
       message: "Erasing device...",
       details: { done: false },
     });
-    await esploader.eraseFlash();
+    await esploader!.eraseFlash();
     fireStateEvent({
       state: FlashStateType.ERASING,
       message: "Device erased",
@@ -173,7 +182,7 @@ export const flash = async (
   let totalWritten = 0;
 
   try {
-    await esploader.writeFlash({
+    await esploader!.writeFlash({
       fileArray,
       flashSize: "keep",
       flashMode: "keep",
@@ -212,7 +221,7 @@ export const flash = async (
       message: err.message,
       details: { error: FlashError.WRITE_FAILED, details: err },
     });
-    await hardResetDevice(transport, esploader);
+    await hardResetDevice(transport, esploader!);
     await transport.disconnect();
     return;
   }
@@ -227,7 +236,7 @@ export const flash = async (
     },
   });
 
-  await hardResetDevice(transport, esploader);
+  await hardResetDevice(transport, esploader!);
 
   console.log("DISCONNECT");
   await transport.disconnect();
