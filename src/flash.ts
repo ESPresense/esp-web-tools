@@ -92,7 +92,7 @@ export const flash = async (
   build = matchingBuilds[0];
 
   if (matchingBuilds.length > 1) {
-    const detectedSerialType = isNativeUSB ? "cdc" : "normal";
+    const detectedSerialType = isNativeUSB ? "cdc" : "uart";
     build = matchingBuilds.find((b) => b.serialType === detectedSerialType) || matchingBuilds[0];
   }
 

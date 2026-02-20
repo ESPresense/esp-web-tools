@@ -21,7 +21,7 @@ export interface Build {
     path: string;
     offset: number;
   }[];
-  serialType?: "cdc" | "normal";
+  serialType?: "cdc" | "uart";
 }
 
 export interface Manifest {
