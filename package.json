@@ -10,7 +10,7 @@
   "author": "ESPHome maintainers",
   "license": "Apache-2.0",
   "scripts": {
-    "prepublishOnly": "script/build"
+    "prepare": "script/build"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.26.0",
